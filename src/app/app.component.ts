@@ -10,7 +10,7 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('counter') counter: CounterComponent;
 
   ngAfterViewInit(): void {
-    this.counter.startAt = 120;
+    this.counter.startAt = 10;
     this.counter.start();
   }
 

@@ -8,7 +8,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { Observable, interval, Subscription } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { take, map, delay } from 'rxjs/operators';
 @Component({
   selector: 'app-counter',
   templateUrl: './counter.component.html',
@@ -30,13 +30,11 @@ export class CounterComponent implements OnInit {
     this.currentValue = this.formatValue(this.startAt);
     this.changeDetector.detectChanges();
     const t: Observable<number> = interval(1000);
-    console.log(this.startAt);
 
     this.currentSubscription = t
-      .pipe(take(this.startAt))
+      .pipe(take(this.startAt)) //Tomara 120 valores
       .pipe(
         map((v) => {
-          console.log(this.startAt, v);
           return this.startAt - v;
         })
       )
@@ -44,7 +42,10 @@ export class CounterComponent implements OnInit {
         (v) => {
           console.log(v);
           this.currentValue = this.formatValue(v);
+          this.changeDetector.detectChanges();
+
           console.log(this.currentValue);
+          delay(100);
         },
         (err) => {
           this.counterState.error(err);
@@ -52,6 +53,7 @@ export class CounterComponent implements OnInit {
         () => {
           this.currentValue = '00:00';
           this.counterState.emit('COMPLETE');
+          this.stop();
         }
       );
   }
@@ -59,6 +61,13 @@ export class CounterComponent implements OnInit {
   public stop() {
     this.currentSubscription.unsubscribe();
     this.counterState.emit('ABORTED');
+    const alert$ = interval(200).pipe(take(1));
+
+    // alert$.subscribe((val) => {
+    //   console.log('vaal', val);
+
+    //   alert('TIEMPO FINALIZADO');
+    // });
   }
 
   private formatValue(v) {
